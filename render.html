@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>API Loading Example</title>
+         <style>
+            * {
+                margin:0;
+                padding:0;
+                box-sizing:border-box;
+                font-family:Arial, Helvetica, sans-serif;
+            }
+
+            body {
+                background:#f2f2f2;
+                height:100vh;
+                width: 100%;
+            }
+            h1 {
+                font-weight: 400;
+                margin-bottom: 20px;
+            }
+            #box {
+                display: flex;
+                justify-content: center;
+                /* align-items: center; */
+                width: 80%;
+                height: 70vh;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                color : red;
+                font-size : 50px;
+            }
+            
+         </style>
+    </head>
+   <body>
+    <h1>Recipe Data</h1>
+    <div id="box" class="loading..">Loading...</div>
+    <script>
+        async function getData()
+        {
+            let box = document.getElementById("box");
+            let res = await fetch("https://dummyjson.com/recipes");
+            let data =  await res.json();
+
+
+            box.innerHTML = "";
+            data.recipes.forEach(function(item){
+                box.innerHTML += 
+                `
+                    <div class="card">
+                    <img src="${item.image}">
+                    <h2>${item.name}</h2>
+                    <p>${item.cuisine}</p>
+                    <p>* ${item.rating}</p>
+                    </div>
+                `;
+            });
+        }
+    </script>
+   </body>
+
+</html>
