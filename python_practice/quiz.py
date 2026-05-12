@@ -35,7 +35,10 @@ def delete_quiz(id: int):
     for items in quizes:
         if items["id"] == id:
             quizes.remove(items)
-            return "quiz deleted"
+            return {
+                    "message": "quiz deleted",
+                    "deleted_quiz": items
+                }
     return {"message": "quiz not found"}
 
 
@@ -52,6 +55,24 @@ def create_quiz(quiz : Quiz): # wants the body of Quiz type
         "message" : "quiz created",
         "quiz_id" : quiz_id
     }
+
+@app.post("/quizes/{id}/submit")
+def submit_quiz(id: int, data: Submit_answer):
+    if id >= len(quizes):
+        raise HTTPException(status_code=404,detail="quiz not found")
+    quiz = quizes[id]
+    questions = quiz["questions"]
+    score = 0
+    for i in range(len(questions)):
+        correct = questions[i]["answer"]
+        if i < len(data.answer) and data.answer[i] == correct:
+            score += 1
+    return {
+        "quiz_title": quiz["title"],
+        "total_questions": len(questions),
+        "score" : score
+    }
+
 
 
         
