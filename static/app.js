@@ -27,6 +27,7 @@ const ragQuestion = document.querySelector("#ragQuestion");
 const ragAskBtn = document.querySelector("#ragAskBtn");
 const sourcesList = document.querySelector("#sourcesList");
 const sourcesCount = document.querySelector("#sourcesCount");
+const API_BASE_URL = "https://intern-8nvs.onrender.com";
 
 let recorder = null;
 let chunks = [];
@@ -197,7 +198,7 @@ function appendStructuredText(container, text, role) {
 }
 
 async function postJson(url, body) {
-  const response = await fetch(url, {
+  const response = await fetch(`${API_BASE_URL}${url}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
@@ -212,7 +213,7 @@ async function postJson(url, body) {
 }
 
 async function getJson(url) {
-  const response = await fetch(url);
+  const response = await fetch(`${API_BASE_URL}${url}`);
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
     throw data;
@@ -355,7 +356,7 @@ uploadForm.addEventListener("submit", async (event) => {
     const formData = new FormData();
     formData.append("file", file);
 
-    const response = await fetch("/rag/upload", {
+    const response = await fetch(`${API_BASE_URL}/rag/upload`, {
       method: "POST",
       body: formData,
     });
@@ -496,7 +497,7 @@ async function sendRecording() {
 
     setStatus("Transcribing and thinking...");
     loadingMessage = addLoadingMessage(messagesEl);
-    const response = await fetch("/chat/voice", {
+    const response = await fetch(`${API_BASE_URL}/chat/voice`, {
       method: "POST",
       body: formData,
     });
