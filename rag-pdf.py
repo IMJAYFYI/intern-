@@ -16,7 +16,7 @@ router = APIRouter(
     tags=["RAG"]
 )
 
-INDEX_DIR = os.path.join(os.path.dirname(__file__), "db", "faiss_index")
+INDEX_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "db", "faiss_index")
 
 # Global status tracker
 rag_state = {
@@ -114,7 +114,7 @@ async def upload_pdf(file: UploadFile = File(...)):
         rag_state["is_loaded"] = True
         
         return {
-            "message": "Medical report successfully processed and indexed.",
+            "message": "PDF successfully processed and indexed.",
             "filename": file.filename,
             "total_pages": total_pages,
             "total_chunks": total_chunks
@@ -130,7 +130,7 @@ async def upload_pdf(file: UploadFile = File(...)):
             "total_chunks": 0,
             "is_loaded": False
         })
-        raise HTTPException(status_code=500, detail=f"Failed to process medical report: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to process PDF: {str(e)}")
     finally:
         # Clean up temp file
         if os.path.exists(temp_dir):
@@ -148,7 +148,7 @@ def query_pdf(req: QueryRequest):
         # Try updating state from disk
         update_state_from_disk()
         if not rag_state["is_loaded"]:
-            raise HTTPException(status_code=400, detail="No medical report has been uploaded and indexed yet.")
+            raise HTTPException(status_code=400, detail="No PDF has been uploaded and indexed yet.")
             
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
@@ -188,26 +188,18 @@ def query_pdf(req: QueryRequest):
         )
         
         # Create prompt
-        prompt = f"""You are an AI Medical Report Analysis Assistant.
+        prompt = f"""You are an expert AI assistant that answers questions based ONLY on the provided PDF context.
+If the context doesn't contain the answer, say exactly: "I cannot find the answer in the provided document."
+Do not try to make up answers outside the context.
 
-Your task is to analyze uploaded medical reports and explain the findings in a professional, clear, and patient-friendly manner.
+Format the answer clearly in plain text:
+- Start with a short direct answer under the heading "Answer:".
+- Use bullet points for supporting details.
+- Add a "Page references:" section when the context contains relevant page numbers.
+- Keep paragraphs short and easy to scan.
+- Do not return one long paragraph.
 
-Important Rules:
-- output should be brief and in bullet points, no more than 5 points.
-- Use simple language that a non-medical person can understand.
-- output should be in the proper format 
-- don't add unnecessary punctuation or words like "*" or "-" in the output.
-
-
-If the report does not contain enough information to determine a condition, respond exactly:
-
-"Unable to determine a medical condition from the provided report alone. Please consult a qualified healthcare professional for diagnosis."
-
-Keep the explanation professional, concise, and easy for a non-medical person to understand.
-
-
-
-
+For any facts or quotes you state, include the page number from the chunks, such as "Page 3".
 
 Context:
 {context}
@@ -249,3 +241,4 @@ def clear_rag():
         "is_loaded": False
     })
     return {"message": "RAG index and state successfully cleared."}
+

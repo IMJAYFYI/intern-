@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Gemini Chat + PDF RAG</title>
+    <link rel="stylesheet" href="/static/styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <section class="app-panel" aria-label="Gemini tools">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">FastAPI + LangChain + Gemini</p>
+            <h1>Chat and PDF RAG</h1>
+          </div>
+          <nav class="tabs" aria-label="Tool views">
+            <button id="chatTab" class="tab active" type="button" aria-controls="chatView" aria-selected="true">Chat</button>
+            <button id="ragTab" class="tab" type="button" aria-controls="ragView" aria-selected="false">PDF RAG</button>
+          </nav>
+        </header>
+
+        <section id="chatView" class="view active" aria-label="Voice chat">
+          <div class="view-toolbar">
+            <span class="toolbar-label">Voice chat</span>
+            <button id="clearBtn" class="secondary-btn" type="button">Clear</button>
+          </div>
+
+          <div id="messages" class="messages" aria-live="polite">
+            <article class="message assistant">
+              <div class="bubble">Say something or type a message to start.</div>
+            </article>
+          </div>
+
+          <div id="status" class="status" role="status"></div>
+
+          <form id="textForm" class="composer">
+            <textarea id="messageInput" rows="1" placeholder="Type your message..." autocomplete="off"></textarea>
+            <button id="sendBtn" type="submit" title="Send message" aria-label="Send message">
+              <span aria-hidden="true">&gt;</span>
+            </button>
+          </form>
+
+          <div class="voice-controls">
+            <button id="recordBtn" class="record-btn" type="button">
+              <span class="record-dot" aria-hidden="true"></span>
+              <span id="recordLabel">Start voice</span>
+            </button>
+            <audio id="replyAudio" controls></audio>
+          </div>
+        </section>
+
+        <section id="ragView" class="view rag-view" aria-label="PDF RAG" hidden>
+          <div class="rag-grid">
+            <aside class="rag-sidebar" aria-label="PDF controls">
+              <form id="uploadForm" class="upload-box">
+                <label class="file-picker" for="pdfInput">
+                  <span class="file-icon" aria-hidden="true">PDF</span>
+                  <span>
+                    <strong id="fileName">Choose a med-PDF</strong>
+                    <small id="fileHint">No med-PDF selected</small>
+                  </span>
+                </label>
+                <input id="pdfInput" type="file" accept="application/pdf,.pdf">
+                <button id="uploadBtn" class="primary-btn" type="submit">Upload med-pdf and index</button>
+              </form>
+
+              <div class="status-card">
+                <p class="card-label">Indexed document</p>
+                <strong id="ragFile">No med-PDF loaded</strong>
+                <dl class="meta-list">
+                  <div>
+                    <dt>Pages</dt>
+                    <dd id="ragPages">0</dd>
+                  </div>
+                  <div>
+                    <dt>Chunks</dt>
+                    <dd id="ragChunks">0</dd>
+                  </div>
+                </dl>
+              </div>
+
+              <button id="clearRagBtn" class="secondary-btn full-width" type="button">Clear PDF index</button>
+              <div id="ragStatus" class="rag-status" role="status"></div>
+            </aside>
+
+            <section class="rag-chat" aria-label="Ask your PDF">
+              <div id="ragMessages" class="rag-messages" aria-live="polite">
+                <article class="message assistant">
+                  <div class="bubble">No med-document indexed.</div>
+                </article>
+              </div>
+
+              <form id="ragQueryForm" class="composer rag-composer">
+                <textarea id="ragQuestion" rows="1" placeholder="Ask a question about the PDF..." autocomplete="off"></textarea>
+                <button id="ragAskBtn" type="submit" title="Ask PDF" aria-label="Ask PDF">
+                  <span aria-hidden="true">&gt;</span>
+                </button>
+              </form>
+
+              <section class="sources-panel" aria-label="Retrieved sources">
+                <div class="sources-header">
+                  <span class="toolbar-label">Sources</span>
+                  <span id="sourcesCount">0 chunks</span>
+                </div>
+                <div id="sourcesList" class="sources-list">
+                  <p class="empty-note">No sources yet.</p>
+                </div>
+              </section>
+            </section>
+          </div>
+        </section>
+      </section>
+    </main>
+    <script src="/static/app.js"></script>
+  </body>
+</html>

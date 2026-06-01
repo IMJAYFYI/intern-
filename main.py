@@ -10,9 +10,7 @@ from medrag import router as rag_router
 import os
 import base64
 import tempfile
-import threading
 import speech_recognition as sr
-import pyttsx3
 from gtts import gTTS
 
 # Load env variables
@@ -50,15 +48,10 @@ chat_memory = []
 # Speech recognizer instance
 recognizer = sr.Recognizer()
 
-# Thread lock for pyttsx3 engine since it is not thread safe
-tts_lock = threading.Lock()
-
 def text_to_speech(text: str) -> str:
     """
     Synthesizes the text to an audio file and returns the base64 encoded audio.
-    Prioritizes gTTS (MP3) for maximum browser compatibility, falling back to pyttsx3.
     """
-    # Try gTTS (MP3) first
     with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_mp3:
         mp3_path = temp_mp3.name
     try:
@@ -68,23 +61,6 @@ def text_to_speech(text: str) -> str:
             audio_data = audio_file.read()
         base64_audio = base64.b64encode(audio_data).decode("utf-8")
         return f"data:audio/mp3;base64,{base64_audio}"
-    except Exception as e:
-        print(f"gTTS failed: {e}. Falling back to pyttsx3...")
-        # Fallback to local pyttsx3 (AIFC/WAV depending on OS)
-        with tts_lock:
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp_wav:
-                wav_path = temp_wav.name
-            try:
-                engine = pyttsx3.init()
-                engine.save_to_file(text, wav_path)
-                engine.runAndWait()
-                with open(wav_path, "rb") as audio_file:
-                    audio_data = audio_file.read()
-                base64_audio = base64.b64encode(audio_data).decode("utf-8")
-                return f"data:audio/wav;base64,{base64_audio}"
-            finally:
-                if os.path.exists(wav_path):
-                    os.remove(wav_path)
     finally:
         if os.path.exists(mp3_path):
             os.remove(mp3_path)
