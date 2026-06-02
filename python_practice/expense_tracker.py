@@ -1,9 +1,18 @@
 from fastapi import FastAPI
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from datetime import date
+from pathlib import Path
 from typing import Literal
 
 app = FastAPI()
+BASE_DIR = Path(__file__).resolve().parent
+app.mount('/static', StaticFiles(directory=BASE_DIR / 'static'), name='static')
+
+@app.get('/')
+def home():
+    return FileResponse(BASE_DIR / 'static' / 'index.html')
 
 class Transaction(BaseModel):
     type: Literal['income', 'expense']
